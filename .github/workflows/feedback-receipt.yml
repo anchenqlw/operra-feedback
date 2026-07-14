@@ -1,0 +1,25 @@
+# 部署到「公共 relay 仓」的 .github/workflows/feedback-receipt.yml。
+# 公共 issue 从创建起只有通用标题与 RSA 密文；本 workflow 只负责及时关闭入口，
+# 不解密、不持私钥，也不需要访问私有仓。密文正文保留供私有 intake 拉取。
+
+name: feedback-receipt
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  close-receipt:
+    if: startsWith(github.event.issue.title, 'Encrypted Operra feedback ·')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close encrypted receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue close "${{ github.event.issue.number }}" \
+            --repo "${{ github.repository }}" \
+            --comment "已安全收到加密反馈，谢谢 🙏"
